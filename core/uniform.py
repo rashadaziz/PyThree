@@ -31,5 +31,6 @@ class Uniform:
         elif self.data_type == "vec4":
             glUniform4f(self.variable_ref, *self.data)
         elif self.data_type == "mat4":
+            # transpose the matrix since OpenGL expects column-major orientation
             glUniformMatrix4fv(self.variable_ref, 1, GL_TRUE, self.data)
         
