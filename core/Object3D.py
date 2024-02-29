@@ -6,6 +6,10 @@ TObject3D = TypeVar('TObject3D', bound="Object3D")
 class Object3D:
     def __init__(self) -> None:
         self.transform = Mat44.make_identity()
+        self.translation_matrix = Mat44.make_identity()
+        self.rotation_matrix = Mat44.make_identity()
+        self.scale_matrix = Mat44.make_identity()
+
         self.parent: TObject3D | None = None
         self.children: List[TObject3D] = []
 

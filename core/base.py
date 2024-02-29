@@ -25,15 +25,16 @@ class BaseApplication(metaclass=ABCMeta):
 
         # init pygame window
         self.screen = pygame.display.set_mode(screen_size, display_flags)
-        pygame.display.set_caption("COSC3000 Project")
+        self.aspect_ratio = screen_size[0] / screen_size[1]
 
         self.is_running = True
         self.clock = pygame.time.Clock()
         self.fps = fps
         self.time = 0
-        self.delta_time = 1/self.fps
+        self.delta_time = self.clock.get_time() / 1000
 
         self.input = Input()
+        pygame.display.set_caption(f"FPS: {int(self.clock.get_fps())}")
 
     @abstractmethod
     def initialize(self):
@@ -60,6 +61,7 @@ class BaseApplication(metaclass=ABCMeta):
 
             # update screen
             pygame.display.flip()
+            pygame.display.set_caption(f"FPS: {int(self.clock.get_fps())}")
 
             self.clock.tick(self.fps)
 

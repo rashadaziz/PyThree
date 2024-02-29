@@ -8,6 +8,7 @@ class SurfaceMaterial(BasicMaterial):
         self.settings["drawStyle"] = GL_TRIANGLES
         self.settings["doubleSide"] = False
         self.settings["wireframe"] = False
+        self.settings["lineWidth"] = 1
 
         self.set_properties(properties)
 

@@ -29,7 +29,7 @@ class Material:
         for var_name, data in properties.items():
             if var_name in self.uniforms.keys():
                 self.uniforms[var_name].data = data
-            elif name in self.settings.keys():
+            elif var_name in self.settings.keys():
                 self.settings[var_name] = data
             else:
                 raise Exception(f"Material has no variable/setting named '{var_name}'")
