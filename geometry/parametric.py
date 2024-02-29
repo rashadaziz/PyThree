@@ -1,7 +1,7 @@
 from geometry.base import Geometry
 from abc import ABC, abstractmethod
 
-class Parametric(Geometry, ABC):
+class ParametricGeometry(Geometry, ABC):
     @abstractmethod
     def __init__(self, u_start, u_end, u_resolution, v_start, v_end, v_resolution, surface_function) -> None:
         super().__init__()

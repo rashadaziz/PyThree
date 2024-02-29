@@ -1,6 +1,6 @@
 from geometry.base import Geometry
 
-class Rectangle(Geometry):
+class RectangleGeometry(Geometry):
     def __init__(self, width=1, height=1) -> None:
         super().__init__()
 

@@ -1,6 +1,6 @@
 from geometry.base import Geometry
 
-class Box(Geometry):
+class BoxGeometry(Geometry):
     def __init__(self, width=1, height=1, depth=1) -> None:
         super().__init__()
 

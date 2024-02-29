@@ -1,7 +1,7 @@
 from geometry.base import Geometry
 from math import sin, cos, pi
 
-class Polygon(Geometry):
+class PolygonGeometry(Geometry):
     def __init__(self, sides=3, radius=1) -> None:
         super().__init__()
 

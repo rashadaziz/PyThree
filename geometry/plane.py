@@ -1,6 +1,6 @@
-from geometry.parametric import Parametric
+from geometry.parametric import ParametricGeometry
 
-class Plane(Parametric):
+class PlaneGeometry(ParametricGeometry):
     def __init__(self, width=1, height=1, n_width_segments=8, n_height_segments=8) -> None:
         def surface_function(u, v):
             return [u, v, 0]

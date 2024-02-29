@@ -1,7 +1,7 @@
-from geometry.parametric import Parametric
+from geometry.parametric import ParametricGeometry
 from math import sin, cos, pi
 
-class Ellipsoid(Parametric):
+class EllipsoidGeometry(ParametricGeometry):
     def __init__(self, width=1, height=1, depth=1, n_radius_segments=32, n_height_segments=16) -> None:
         def surface_function(u, v):
             return [
