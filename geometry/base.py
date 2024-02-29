@@ -1,7 +1,7 @@
 from core.attribute import Attribute
 from typing import Dict, TypeVar
 
-TGeometry = TypeVar('TGeometry', 'Geometry')
+TGeometry = TypeVar('TGeometry', bound='Geometry')
 
 class Geometry:
     def __init__(self) -> None:

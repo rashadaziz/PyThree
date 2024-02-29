@@ -7,7 +7,7 @@ class ParametricGeometry(Geometry, ABC):
         super().__init__()
 
         d_u = (u_end - u_start) / u_resolution
-        d_v = (v_end - v_end) / v_resolution
+        d_v = (v_end - v_start) / v_resolution
         positions = []
 
         for u_idx in range(u_resolution + 1):

@@ -10,7 +10,7 @@ class CylindricalGeometry(ParametricGeometry):
             return [
                 (v*radius_top + (1-v)*radius_bottom) * sin(u),
                 height * (v-0.5),
-                (v*radius_top + (1-v)*radius_bottom * cos(u))
+                (v*radius_top + (1-v)*radius_bottom) * cos(u)
             ]
 
         super().__init__(0, 2*pi, n_radial_segments, 0, 1, n_height_segments, surface_function)
