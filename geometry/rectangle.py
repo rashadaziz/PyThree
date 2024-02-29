@@ -14,9 +14,9 @@ class Rectangle(Geometry):
         c2 = [0, 1, 0]
         c3 = [0, 0, 1]
 
-        position_date = [p0, p1, p3,  p0, p3, p2]
+        position_data = [p0, p1, p3,  p0, p3, p2]
         color_data = [c0, c1, c3,  c0, c3, c2]
 
-        self.add_attribute("vec3", "vertexPosition")
-        self.add_attribute("vec3", "vertexColor")
+        self.add_attribute("vec3", "vertexPosition", position_data)
+        self.add_attribute("vec3", "vertexColor", color_data)
         self.count_vertices()

@@ -38,6 +38,6 @@ class Parametric(Geometry, ABC):
 
                 color_data += [c1, c2, c3, c4, c5, c6]
 
-        self.add_attribute("vec3", "vertexPosition")
-        self.add_attribute("vec3", "vertexColor")
+        self.add_attribute("vec3", "vertexPosition", position_data)
+        self.add_attribute("vec3", "vertexColor", color_data)
         self.count_vertices()

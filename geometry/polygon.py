@@ -19,6 +19,6 @@ class Polygon(Geometry):
             color_data.append([1, 0, 0])
             color_data.append([0, 0, 1])
 
-        self.add_attribute("vec3", "vertexPosition")
-        self.add_attribute("vec3", "vertexColor")
+        self.add_attribute("vec3", "vertexPosition", position_data)
+        self.add_attribute("vec3", "vertexColor", color_data)
         self.count_vertices()
