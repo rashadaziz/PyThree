@@ -76,3 +76,24 @@ class Mat44:
             [0,   0,  b, c],
             [0,   0, -1, 0]
         ]).astype(float)
+    
+    @staticmethod
+    def make_look_at(position, target, world_up=[0, 1, 0]):
+        forward = np.subtract(target, position)
+        right = np.cross(forward, world_up)
+        
+        # if forward and world_up are parallel
+        if np.linalg.norm(right) < 1e-6:
+            offset = np.array([0, 0, -1e-3])
+            right = np.cross(forward, world_up + offset)
+
+        up = np.cross(right, forward)
+        forward = np.divide(forward, np.linalg.norm(forward))
+        right = np.divide(right, np.linalg.norm(right))
+        up = np.divide(up, np.linalg.norm(up))
+        return np.array(
+            [[right[0], up[0], -forward[0], position[0]],
+             [right[1], up[1], -forward[1], position[1]],
+             [right[2], up[2], -forward[2], position[2]],
+             [0, 0, 0, 1]]
+        ).astype(float)

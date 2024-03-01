@@ -1,5 +1,6 @@
 from core.Object3D import Object3D
 from core.matrix import Mat44
+from core.input import Input
 from numpy.linalg import inv
 
 class Camera(Object3D):
@@ -12,4 +13,5 @@ class Camera(Object3D):
     def update_view_matrix(self):
         self.view_matrix = inv(self.get_world_matrix())
 
-    
+    def process_input(self, input: Input):
+        pass    

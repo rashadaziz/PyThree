@@ -9,7 +9,10 @@ class Input:
         self.key_pressed_set = set()
         self.key_up_set = set()
 
+        self.is_mouse_moving = False
+
     def get(self):
+        self.mouse_moving = False
         self.key_down_set.clear()
         self.key_up_set.clear()
         for event in pygame.event.get():
@@ -21,6 +24,8 @@ class Input:
             if event.type == KEYUP:
                 self.key_up_set.add(event.key)
                 self.key_pressed_set.remove(event.key)
+            if event.type == MOUSEMOTION:
+                self.is_mouse_moving = True
 
     def is_key_down(self, key):
         return key in self.key_down_set
