@@ -1,11 +1,12 @@
+import quaternion
 from core.matrix import Mat44
 from typing import TypeVar, List
+import numpy as np
 
 TObject3D = TypeVar('TObject3D', bound="Object3D")
 
 class Object3D:
     def __init__(self) -> None:
-        self.transform = Mat44.make_identity()
         self.translation_matrix = Mat44.make_identity()
         self.rotation_matrix = Mat44.make_identity()
         self.scale_matrix = Mat44.make_identity()
@@ -22,12 +23,14 @@ class Object3D:
         child.parent = None
 
     def get_world_matrix(self):
+        model_matrix = self.translation_matrix @ self.rotation_matrix @ self.scale_matrix
+
         # if this is the root
         if self.parent is None:
-            return self.transform
+            return model_matrix
 
         # recursively query the world matrix
-        return self.parent.get_world_matrix() @ self.transform
+        return self.parent.get_world_matrix() @ model_matrix
 
     def get_descendants(self) -> List[TObject3D]:
         descendants: List[TObject3D] = []
@@ -39,31 +42,43 @@ class Object3D:
 
         return descendants
     
-    def apply_matrix(self, matrix, is_local=True):
+    def apply_translation(self, matrix, is_local=True):
         if is_local:
-            self.transform = self.transform @ matrix
+            self.translation_matrix = self.translation_matrix @ matrix
         else:
-            self.transform = matrix @ self.transform
+            self.translation_matrix = matrix @ self.translation_matrix
+
+    def apply_rotation(self, matrix, is_local=True):
+        if is_local:
+            self.rotation_matrix = self.rotation_matrix @ matrix
+        else:
+            self.rotation_matrix = matrix @ self.rotation_matrix
+
+    def apply_scale(self, matrix, is_local=True):
+        if is_local:
+            self.scale_matrix = self.scale_matrix @ matrix
+        else:
+            self.scale_matrix = matrix @ self.scale_matrix
     
     def translate(self, x, y, z, is_local=True):
         m = Mat44.make_translation(x, y, z)
-        self.apply_matrix(m, is_local)
+        self.apply_translation(m, is_local)
     
     def rotate_x(self, angle, is_local=True):
         m = Mat44.make_rotation_x(angle)
-        self.apply_matrix(m, is_local)
+        self.apply_rotation(m, is_local)
     
     def rotate_y(self, angle, is_local=True):
         m = Mat44.make_rotation_y(angle)
-        self.apply_matrix(m, is_local)
+        self.apply_rotation(m, is_local)
     
     def rotate_z(self, angle, is_local=True):
         m = Mat44.make_rotation_z(angle)
-        self.apply_matrix(m, is_local)
+        self.apply_rotation(m, is_local)
 
     def scale(self, scale, is_local=True):
         m = Mat44.make_scale(scale)
-        self.apply_matrix(m, is_local)
+        self.apply_scale(m, is_local)
 
     """
     Get the last column of this matrix
@@ -74,9 +89,9 @@ class Object3D:
     """
     def get_position(self):
         return [
-            self.transform.item((0, 3)),
-            self.transform.item((1, 3)),
-            self.transform.item((2, 3)),
+            self.translation_matrix.item((0, 3)),
+            self.translation_matrix.item((1, 3)),
+            self.translation_matrix.item((2, 3)),
         ]
     
     def get_world_position(self):
@@ -88,6 +103,9 @@ class Object3D:
         ]
     
     def set_position(self, position):
-        self.transform.itemset((0, 3), position[0])
-        self.transform.itemset((1, 3), position[1])
-        self.transform.itemset((2, 3), position[2])
+        self.translation_matrix.itemset((0, 3), position[0])
+        self.translation_matrix.itemset((1, 3), position[1])
+        self.translation_matrix.itemset((2, 3), position[2])
+
+    def set_rotation(self, rotation):
+        self.rotation_matrix[:3, :3] = rotation
