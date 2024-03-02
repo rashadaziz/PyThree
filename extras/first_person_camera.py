@@ -18,6 +18,7 @@ class FirstPersonCamera(Camera):
         self.no_clip = False
         self.spacebar_timer = 0
         self.space_was_pressed = False
+        self.is_moving = False
 
         self.camera_front = [0, 0, 0]
         self.camera_up = [0, 1, 0]
@@ -86,6 +87,7 @@ class FirstPersonCamera(Camera):
         self.yaw = yaw
 
     def move(self, dir, boost):
+        self.is_moving = True
         delta_time = self.clock.get_time() / 1000
         current_pos = self.get_world_position()
         new_pos = current_pos
@@ -124,8 +126,6 @@ class FirstPersonCamera(Camera):
         self.set_rotation(rotation_matrix)
 
     def update_view_matrix(self):
-        self.update_rotation_matrix()
-
         if not self.no_clip and self.translation_matrix[1, 3] > 1:
             delta_time = self.clock.get_time() / 1000
             y_pos = self.translation_matrix[1, 3]
@@ -135,3 +135,8 @@ class FirstPersonCamera(Camera):
             self.translation_matrix.itemset((1, 3), 1)
 
         return super().update_view_matrix()
+    
+    def update(self):
+        self.update_rotation_matrix()
+        self.update_view_matrix()
+        self.is_moving = False
