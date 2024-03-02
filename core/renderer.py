@@ -12,7 +12,7 @@ class Renderer:
     def render(self, scene: Scene, camera: Camera):
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        camera.update_view_matrix()
+        camera.update()
 
         descendant_list = scene.get_descendants()
         mesh_list: list[Mesh] = list(filter(lambda obj: isinstance(obj, Mesh), descendant_list))
