@@ -13,5 +13,11 @@ class Camera(Object3D):
     def update_view_matrix(self):
         self.view_matrix = inv(self.get_world_matrix())
 
+    def update_rotation_matrix(self):
+        pass
+
+    def update(self):
+        pass
+
     def process_input(self, input: Input):
-        pass    
+        pass
