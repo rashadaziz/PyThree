@@ -53,3 +53,6 @@ def load_shader(shader_file_name: str):
     with open(SHADER_PATH + shader_file_name) as shader:
         content = shader.read()
     return content
+
+def lerp(a, b, t):
+    return (1 - t) * a + t * b
