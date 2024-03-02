@@ -12,7 +12,7 @@ class Input:
         self.is_mouse_moving = False
 
     def get(self):
-        self.mouse_moving = False
+        self.is_mouse_moving = False
         self.key_down_set.clear()
         self.key_up_set.clear()
         for event in pygame.event.get():
