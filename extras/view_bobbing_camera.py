@@ -5,13 +5,14 @@ import numpy as np
 
 
 class ViewBobbingCamera(FirstPersonCamera):
-    def __init__(self, clock, fov=60, aspect_ratio=1, near=0.1, far=1000, initial_position=[0, 1, 0]) -> None:
+    def __init__(self, clock, effect_multiplier=1, fov=60, aspect_ratio=1, near=0.1, far=1000, initial_position=[0, 1, 0]) -> None:
         super().__init__(clock, fov, aspect_ratio, near, far, initial_position)
 
         self.bob_cam = Camera()
         self.add(self.bob_cam)
 
         self.time = 0
+        self.effect_multiplier = effect_multiplier
 
     def get_world_matrix(self):
         fps_matrix = self.translation_matrix @ self.rotation_matrix @ self.scale_matrix
@@ -27,10 +28,10 @@ class ViewBobbingCamera(FirstPersonCamera):
         delta_time = self.clock.get_time() / 1000
         x_speed = 10*self.time
         y_speed = 15*self.time
-        x_amplitude = 0.0045
-        y_amplitude = 0.03
-        x_amplitude_rest = 0.009
-        y_amplitude_rest = 0.015
+        x_amplitude = 0.0045*self.effect_multiplier
+        y_amplitude = 0.03*self.effect_multiplier
+        x_amplitude_rest = 0.009*self.effect_multiplier
+        y_amplitude_rest = 0.015*self.effect_multiplier
         constant = 50
 
         is_on_ground = not self.no_clip and np.isclose(

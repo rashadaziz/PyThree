@@ -20,10 +20,10 @@ class Test(BaseApplication):
 
         self.renderer = Renderer()
         self.scene = Scene()
-        self.camera = ViewBobbingCamera(clock=self.clock, aspect_ratio=self.aspect_ratio, initial_position=[-2, 1, 4])
+        self.camera = ViewBobbingCamera(self.clock, effect_multiplier=1.25, aspect_ratio=self.aspect_ratio, initial_position=[-2, 1, 4])
 
         self.mesh = Mesh(geometry=ObjectGeometry("crocodile.obj", scale=0.01),
-                         material=SurfaceMaterial({"useVertexColors": True, "wireframe": True}))
+                         material=SurfaceMaterial({"useVertexColors": True}))
         self.mesh.translate(0, .1, 0)
         self.mesh.rotate_x(-pi/2)
         self.scene.add(self.mesh)
@@ -45,7 +45,7 @@ class Test(BaseApplication):
 
 
 def main():
-    Test(screen_size=[1600, 900], fps=120).run()
+    Test(screen_size=[1600, 900], fps=60).run()
 
 
 if __name__ == "__main__":
