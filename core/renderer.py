@@ -15,7 +15,8 @@ class Renderer:
         camera.update()
 
         descendant_list = scene.get_descendants()
-        mesh_list: list[Mesh] = list(filter(lambda obj: isinstance(obj, Mesh), descendant_list))
+        camera_descendant_list = camera.get_descendants()
+        mesh_list: list[Mesh] = list(filter(lambda obj: isinstance(obj, Mesh), descendant_list + camera_descendant_list))
 
         for mesh in mesh_list:
             if not mesh.visible:
@@ -29,7 +30,7 @@ class Renderer:
             mesh.material.uniforms["viewMatrix"].data = camera.view_matrix
             mesh.material.uniforms["projectionMatrix"].data = camera.projection_matrix
 
-            for _, uniform_obj in mesh.material.uniforms.items():
+            for uniform_obj in mesh.material.uniforms.values():
                 uniform_obj.upload_data()
 
             mesh.material.update_render_settings()
