@@ -1,5 +1,5 @@
 from extras.first_person_camera import FirstPersonCamera
-from core.camera import Camera
+from core.matrix import Mat44
 from math import sin, cos
 import numpy as np
 
@@ -8,17 +8,15 @@ class ViewBobbingCamera(FirstPersonCamera):
     def __init__(self, clock, effect_multiplier=1, fov=60, aspect_ratio=1, near=0.1, far=1000, initial_position=[0, 1, 0]) -> None:
         super().__init__(clock, fov, aspect_ratio, near, far, initial_position)
 
-        self.bob_cam = Camera()
-        self.add(self.bob_cam)
+        self.bob_translation_matrix = Mat44.make_identity()
 
         self.time = 0
         self.effect_multiplier = effect_multiplier
 
     def get_world_matrix(self):
         fps_matrix = self.translation_matrix @ self.rotation_matrix @ self.scale_matrix
-        bob_matrix = self.bob_cam.translation_matrix @ self.bob_cam.rotation_matrix @ self.bob_cam.scale_matrix
+        bob_matrix = self.bob_translation_matrix
         model_matrix = fps_matrix @ bob_matrix
-
         if self.parent is None:
             return model_matrix
 
@@ -38,18 +36,18 @@ class ViewBobbingCamera(FirstPersonCamera):
             self.get_position()[1], 1)
 
         if self.is_moving and is_on_ground:
-            self.bob_cam.translation_matrix.itemset(
+            self.bob_translation_matrix.itemset(
                 (1, 3), y_amplitude*sin(y_speed)*delta_time*constant)
-            self.bob_cam.translation_matrix.itemset(
+            self.bob_translation_matrix.itemset(
                 (0, 3), x_amplitude*cos(x_speed)*delta_time*constant)
         elif is_on_ground:
-            self.bob_cam.translation_matrix.itemset(
+            self.bob_translation_matrix.itemset(
                 (1, 3), y_amplitude_rest*sin(y_speed*0.1)*delta_time*constant)
-            self.bob_cam.translation_matrix.itemset(
+            self.bob_translation_matrix.itemset(
                 (0, 3), x_amplitude_rest*cos(x_speed*0.1)*delta_time*constant)
         else:
-            self.bob_cam.translation_matrix.itemset((1, 3), 0)
-            self.bob_cam.translation_matrix.itemset((0, 3), 0)
+            self.bob_translation_matrix.itemset((1, 3), 0)
+            self.bob_translation_matrix.itemset((0, 3), 0)
 
         return super().update_view_matrix()
 
