@@ -19,8 +19,11 @@ class FirstPersonCamera(Camera):
         self.spacebar_timer = 0
         self.space_was_pressed = False
         self.is_moving = False
+        self.boost = False
 
-        self.camera_front = [0, 0, 0]
+        self.move_direction = np.array([0, 0, 0]).astype(float)
+
+        self.camera_front = np.array([0, 0, 0]).astype(float)
         self.camera_up = [0, 1, 0]
         self.camera_speed = 2.5
 
@@ -28,6 +31,9 @@ class FirstPersonCamera(Camera):
         self.update_rotation_matrix()
 
     def process_input(self, input):
+        if self.locked:
+            return
+        
         if self.space_was_pressed:
             self.spacebar_timer += self.clock.get_time() / 1000
 
@@ -35,19 +41,16 @@ class FirstPersonCamera(Camera):
             self.spacebar_timer = 0
             self.space_was_pressed = False
 
-        if self.locked:
-            return
-
-        boost = input.is_key_pressed(K_LSHIFT)
+        self.boost = input.is_key_pressed(K_LSHIFT)
 
         if input.is_key_pressed(K_w):
-            self.move("forward", boost)
+            self.move("forward")
         if input.is_key_pressed(K_a):
-            self.move("left", boost)
+            self.move("left")
         if input.is_key_pressed(K_s):
-            self.move("backward", boost)
+            self.move("backward")
         if input.is_key_pressed(K_d):
-            self.move("right", boost)
+            self.move("right")
 
         if input.is_key_down(K_SPACE):
             if self.spacebar_timer > 0 and self.space_was_pressed:
@@ -64,10 +67,10 @@ class FirstPersonCamera(Camera):
             dx, dy = pygame.mouse.get_rel()
             self.yaw += dx * sensitivity
             self.pitch -= dy * sensitivity
-            if self.pitch > 89:
-                self.pitch = 89
-            elif self.pitch < -89:
-                self.pitch = -89
+            if self.pitch > 85:
+                self.pitch = 85
+            elif self.pitch < -85:
+                self.pitch = -85
         
         if self.no_clip:
             delta_time = self.clock.get_time() / 1000
@@ -86,28 +89,28 @@ class FirstPersonCamera(Camera):
         self.pitch = pitch
         self.yaw = yaw
 
-    def move(self, dir, boost):
+    def move(self, dir):
         self.is_moving = True
-        delta_time = self.clock.get_time() / 1000
-        current_pos = self.get_world_position()
-        new_pos = current_pos
-        speed = self.camera_speed * delta_time
-        if boost:
-            speed *= 2
-        if dir == "forward":
-            new_pos = np.add(current_pos, np.multiply(speed, self.camera_front))
-        elif dir == "backward":
-            new_pos = np.subtract(current_pos, np.multiply(speed, self.camera_front))
-        elif dir == "left":
-            vec = np.cross(self.camera_front, self.camera_up).astype(float)
-            vec /= np.linalg.norm(vec)
-            new_pos = np.subtract(current_pos, np.multiply(vec, speed))
-        elif dir == "right":
-            vec = np.cross(self.camera_front, self.camera_up).astype(float)
-            vec /= np.linalg.norm(vec)
-            new_pos = np.add(current_pos, np.multiply(vec, speed))
 
-        self.set_position(new_pos)
+        camera_dir = self.camera_front
+
+        if not self.no_clip:
+            # kill y component of movement direction
+            camera_dir = [self.camera_front[0], 0, self.camera_front[2]]
+            camera_dir /= np.linalg.norm(camera_dir)
+
+        if dir == "forward":
+            self.move_direction += camera_dir
+        elif dir == "backward":
+            self.move_direction -= camera_dir
+        elif dir == "left":
+            vec = np.cross(camera_dir, self.camera_up).astype(float)
+            vec /= np.linalg.norm(vec)
+            self.move_direction -= vec
+        elif dir == "right":
+            vec = np.cross(camera_dir, self.camera_up).astype(float)
+            vec /= np.linalg.norm(vec)
+            self.move_direction += vec
 
     def update_rotation_matrix(self):
         to_rad = pi / 180
@@ -121,7 +124,7 @@ class FirstPersonCamera(Camera):
         q2 = np.quaternion(cos(yaw/2), 0, sin(yaw/2), 0)
 
         rotation_matrix = quaternion.as_rotation_matrix(q2 * q1)
-        self.camera_front = np.negative(self.rotation_matrix[:3, 2])
+        self.camera_front = np.negative(self.rotation_matrix[:3, 2]).astype(float)
 
         self.set_rotation(rotation_matrix)
 
@@ -134,9 +137,19 @@ class FirstPersonCamera(Camera):
             # keep camera on the ground
             self.translation_matrix.itemset((1, 3), 1)
 
+        delta_time = self.clock.get_time() / 1000
+        speed = self.camera_speed * delta_time
+        if self.boost:
+            speed *= 2
+        
+        if np.linalg.norm(self.move_direction) > 0:
+            dir = self.move_direction / np.linalg.norm(self.move_direction)
+            self.translate(*np.multiply(speed, dir))
+
         return super().update_view_matrix()
     
     def update(self):
         self.update_rotation_matrix()
         self.update_view_matrix()
         self.is_moving = False
+        self.move_direction = np.array([0, 0, 0]).astype(float)
