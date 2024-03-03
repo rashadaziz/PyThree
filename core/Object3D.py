@@ -67,16 +67,13 @@ class Object3D:
         self.apply_rotation(q)
     
     def rotate_x(self, angle):
-        qx = np.quaternion(cos(angle/2), sin(angle/2), 0, 0)
-        self.apply_rotation(qx)
+        self.rotate_around_axis(angle, [1, 0, 0])
     
     def rotate_y(self, angle):
-        qy = np.quaternion(cos(angle/2), 0, sin(angle/2), 0)
-        self.apply_rotation(qy)
+        self.rotate_around_axis(angle, [0, 1, 0])
     
     def rotate_z(self, angle):
-        qz = np.quaternion(cos(angle/2), 0, 0, sin(angle/2))
-        self.apply_rotation(qz)
+        self.rotate_around_axis(angle, [0, 0, 1])
 
     def scale(self, scale, is_local=True):
         m = Mat44.make_scale(scale)
