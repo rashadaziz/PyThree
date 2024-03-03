@@ -1,6 +1,7 @@
 from extras.first_person_camera import FirstPersonCamera
 from core.camera import Camera
 from math import sin, cos
+import numpy as np
 
 
 class ViewBobbingCamera(FirstPersonCamera):
@@ -28,21 +29,20 @@ class ViewBobbingCamera(FirstPersonCamera):
         y_speed = 15*self.time
         x_amplitude = 0.0045
         y_amplitude = 0.03
-        x_damping = 0.994
-        y_damping = 0.98
+        x_amplitude_rest = 0.009
+        y_amplitude_rest = 0.015
         constant = 50
 
-        if self.is_moving and not self.no_clip:
+        if self.is_moving and not self.no_clip and np.isclose(self.get_position()[1], 1):
             self.bob_cam.translation_matrix.itemset(
                 (1, 3), y_amplitude*sin(y_speed)*delta_time*constant)
             self.bob_cam.translation_matrix.itemset(
                 (0, 3), x_amplitude*cos(x_speed)*delta_time*constant)
         else:
-            x, y = self.bob_cam.translation_matrix[:2, 3]
             self.bob_cam.translation_matrix.itemset(
-                (1, 3), y*y_damping*delta_time*constant)
+                (1, 3), y_amplitude_rest*sin(y_speed*0.1)*delta_time*constant)
             self.bob_cam.translation_matrix.itemset(
-                (0, 3), x*x_damping*delta_time*constant)
+                (0, 3), x_amplitude_rest*cos(x_speed*0.1)*delta_time*constant)
 
         return super().update_view_matrix()
 
