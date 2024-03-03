@@ -33,16 +33,22 @@ class ViewBobbingCamera(FirstPersonCamera):
         y_amplitude_rest = 0.015
         constant = 50
 
-        if self.is_moving and not self.no_clip and np.isclose(self.get_position()[1], 1):
+        is_on_ground = not self.no_clip and np.isclose(
+            self.get_position()[1], 1)
+
+        if self.is_moving and is_on_ground:
             self.bob_cam.translation_matrix.itemset(
                 (1, 3), y_amplitude*sin(y_speed)*delta_time*constant)
             self.bob_cam.translation_matrix.itemset(
                 (0, 3), x_amplitude*cos(x_speed)*delta_time*constant)
-        else:
+        elif is_on_ground:
             self.bob_cam.translation_matrix.itemset(
                 (1, 3), y_amplitude_rest*sin(y_speed*0.1)*delta_time*constant)
             self.bob_cam.translation_matrix.itemset(
                 (0, 3), x_amplitude_rest*cos(x_speed*0.1)*delta_time*constant)
+        else:
+            self.bob_cam.translation_matrix.itemset((1, 3), 0)
+            self.bob_cam.translation_matrix.itemset((0, 3), 0)
 
         return super().update_view_matrix()
 
