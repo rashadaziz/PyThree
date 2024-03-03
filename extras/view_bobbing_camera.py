@@ -21,6 +21,15 @@ class ViewBobbingCamera(FirstPersonCamera):
             return model_matrix
 
         return self.parent.get_world_matrix() @ model_matrix
+    
+    def get_world_position(self):
+        fps_matrix = self.translation_matrix @ self.rotation_matrix @ self.scale_matrix
+
+        if self.parent is None:
+            return fps_matrix[:3, 3]
+        
+        world_matrix = self.parent.get_world_matrix()
+        return (world_matrix @ fps_matrix)[:3, 3]
 
     def update_view_matrix(self):
         delta_time = self.clock.get_time() / 1000
