@@ -9,7 +9,6 @@ class ParametricGeometry(Geometry, ABC):
         d_u = (u_end - u_start) / u_resolution
         d_v = (v_end - v_start) / v_resolution
         positions = []
-
         for u_idx in range(u_resolution + 1):
             v_array = []
             for v_idx in range(v_resolution + 1):
@@ -17,9 +16,19 @@ class ParametricGeometry(Geometry, ABC):
                 v = v_start + v_idx * d_v
                 v_array.append(surface_function(u, v))
             positions.append(v_array)
+        
+        uvs = []
+        for u_idx in range(u_resolution + 1):
+            v_array = []
+            for v_idx in range(v_resolution + 1):
+                u = u_idx / u_resolution
+                v = v_idx / v_resolution
+                v_array.append([u, v])
+            uvs.append(v_array)
 
         position_data = []
         color_data = []
+        uv_data = []
 
         c1, c2, c3 = [1, 0, 0], [0, 1, 0], [0, 0, 1]
         c4, c5, c6 = [0, 1, 1], [1, 0, 1], [1, 1, 0]
@@ -38,6 +47,14 @@ class ParametricGeometry(Geometry, ABC):
 
                 color_data += [c1, c2, c3, c4, c5, c6]
 
+                uvA = uvs[x][y]
+                uvB = uvs[x+1][y]
+                uvC = uvs[x+1][y+1]
+                uvD = uvs[x][y+1]
+
+                uv_data += [uvA, uvB, uvC, uvA, uvC, uvD]
+
         self.add_attribute("vec3", "vertexPosition", position_data)
         self.add_attribute("vec3", "vertexColor", color_data)
+        self.add_attribute("vec2", "vertexUV", uv_data)
         self.count_vertices()

@@ -7,6 +7,8 @@ class Renderer:
     def __init__(self, clear_color=[0, 0, 0]) -> None:
         glEnable(GL_DEPTH_TEST)
         glEnable(GL_MULTISAMPLE)
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glClearColor(*clear_color, 1)
 
     def render(self, scene: Scene, camera: Camera):

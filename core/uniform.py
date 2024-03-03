@@ -33,4 +33,9 @@ class Uniform:
         elif self.data_type == "mat4":
             # transpose the matrix since OpenGL expects column-major orientation
             glUniformMatrix4fv(self.variable_ref, 1, GL_TRUE, self.data)
+        elif self.data_type == "sampler2D":
+            texture_obj_ref, texture_unit_ref = self.data
+            glActiveTexture(GL_TEXTURE0 + texture_unit_ref)
+            glBindTexture(GL_TEXTURE_2D, texture_obj_ref)
+            glUniform1i(self.variable_ref, texture_unit_ref)
         

@@ -9,6 +9,8 @@ class PolygonGeometry(Geometry):
 
         position_data = []
         color_data = []
+        uv_data = []
+        uv_center = [.5, .5]
 
         for n in range(sides):
             position_data.append([0, 0, 0])
@@ -19,6 +21,11 @@ class PolygonGeometry(Geometry):
             color_data.append([1, 0, 0])
             color_data.append([0, 0, 1])
 
+            uv_data.append(uv_center)
+            uv_data.append([cos(n*base_angle)*.5 + .5, sin(n*base_angle)*.5 + .5])
+            uv_data.append([cos((n+1)*base_angle)*.5 + .5, sin((n+1)*base_angle)*.5 + .5])
+
         self.add_attribute("vec3", "vertexPosition", position_data)
         self.add_attribute("vec3", "vertexColor", color_data)
+        self.add_attribute("vec2", "vertexUV", uv_data)
         self.count_vertices()
