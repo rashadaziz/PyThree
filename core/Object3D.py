@@ -2,6 +2,7 @@ import quaternion
 from core.matrix import Mat44
 from typing import TypeVar, List
 import numpy as np
+from math import sin, cos
 
 TObject3D = TypeVar('TObject3D', bound="Object3D")
 
@@ -48,11 +49,8 @@ class Object3D:
         else:
             self.translation_matrix = matrix @ self.translation_matrix
 
-    def apply_rotation(self, matrix, is_local=True):
-        if is_local:
-            self.rotation_matrix = self.rotation_matrix @ matrix
-        else:
-            self.rotation_matrix = matrix @ self.rotation_matrix
+    def apply_rotation(self, q):
+        self.rotation_matrix[:3, :3] = quaternion.as_rotation_matrix(q) @ self.rotation_matrix[:3, :3]
 
     def apply_scale(self, matrix, is_local=True):
         if is_local:
@@ -63,18 +61,22 @@ class Object3D:
     def translate(self, x, y, z, is_local=True):
         m = Mat44.make_translation(x, y, z)
         self.apply_translation(m, is_local)
+
+    def rotate_around_axis(self, angle, axis):
+        q = np.quaternion(cos(angle/2), *np.multiply(axis, [sin(angle/2), sin(angle/2), sin(angle/2)]))
+        self.apply_rotation(q)
     
-    def rotate_x(self, angle, is_local=True):
-        m = Mat44.make_rotation_x(angle)
-        self.apply_rotation(m, is_local)
+    def rotate_x(self, angle):
+        qx = np.quaternion(cos(angle/2), sin(angle/2), 0, 0)
+        self.apply_rotation(qx)
     
-    def rotate_y(self, angle, is_local=True):
-        m = Mat44.make_rotation_y(angle)
-        self.apply_rotation(m, is_local)
+    def rotate_y(self, angle):
+        qy = np.quaternion(cos(angle/2), 0, sin(angle/2), 0)
+        self.apply_rotation(qy)
     
-    def rotate_z(self, angle, is_local=True):
-        m = Mat44.make_rotation_z(angle)
-        self.apply_rotation(m, is_local)
+    def rotate_z(self, angle):
+        qz = np.quaternion(cos(angle/2), 0, 0, sin(angle/2))
+        self.apply_rotation(qz)
 
     def scale(self, scale, is_local=True):
         m = Mat44.make_scale(scale)

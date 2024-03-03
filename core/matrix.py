@@ -1,4 +1,5 @@
 import numpy as np
+import quaternion
 from math import sin, cos, tan, pi
 
 
@@ -23,36 +24,31 @@ class Mat44:
     
     @staticmethod
     def make_rotation_x(angle):
-        c = cos(angle)
-        s = sin(angle)
-        return np.array([
-            [1, 0,  0, 0],
-            [0, c, -s, 0],
-            [0, s,  c, 0],
-            [0, 0,  0, 1]
-        ]).astype(float)
+        q_mat = Mat44.make_identity()
+        qx = np.quaternion(cos(angle/2), sin(angle/2), 0, 0)
+        q_mat[:3, :3] = quaternion.as_rotation_matrix(qx)
+        return q_mat
     
     @staticmethod
     def make_rotation_y(angle):
-        c = cos(angle)
-        s = sin(angle)
-        return np.array([
-            [ c, 0, s, 0],
-            [ 0, 1, 0, 0],
-            [-s, 0, c, 0],
-            [ 0, 0, 0, 1]
-        ]).astype(float)
+        q_mat = Mat44.make_identity()
+        qy = np.quaternion(cos(angle/2), 0, sin(angle/2), 0)
+        q_mat[:3, :3] = quaternion.as_rotation_matrix(qy)
+        return q_mat
     
     @staticmethod
     def make_rotation_z(angle):
-        c = cos(angle)
-        s = sin(angle)
-        return np.array([
-            [c, -s,  0, 0],
-            [s,  c,  0, 0],
-            [0,  0,  1, 0],
-            [0,  0,  0, 1]
-        ]).astype(float)
+        q_mat = Mat44.make_identity()
+        qz = np.quaternion(cos(angle/2), 0, 0, sin(angle/2))
+        q_mat[:3, :3] = quaternion.as_rotation_matrix(qz)
+        return q_mat
+    
+    @staticmethod
+    def make_rotation_around_axis(angle, axis):
+        q_mat = Mat44.make_identity()
+        q = np.quaternion(cos(angle/2), *np.multiply(axis, [sin(angle/2), sin(angle/2), sin(angle/2)]))
+        q_mat[:3, :3] = quaternion.as_rotation_matrix(q)
+        return q_mat
     
     @staticmethod
     def make_scale(s):
