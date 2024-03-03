@@ -1,6 +1,8 @@
 from OpenGL.GL import *
 
-SHADER_PATH = 'assets/shaders/'
+ASSETS_PATH = 'assets/'
+SHADER_PATH = ASSETS_PATH + 'shaders/'
+OBJECT_PATH = ASSETS_PATH + 'objects/'
 
 class OpenGLUtils:
     @staticmethod

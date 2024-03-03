@@ -9,3 +9,4 @@ from geometry.prism import PrismGeometry
 from geometry.pyramid import PyramidGeometry
 from geometry.rectangle import RectangleGeometry
 from geometry.sphere import SphereGeometry
+from geometry.object import ObjectGeometry
