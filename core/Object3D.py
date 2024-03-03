@@ -2,9 +2,10 @@ import quaternion
 from core.matrix import Mat44
 from typing import TypeVar, List
 import numpy as np
-from math import sin, cos
+from math import sin, cos, atan2, pi
 
 TObject3D = TypeVar('TObject3D', bound="Object3D")
+
 
 class Object3D:
     def __init__(self) -> None:
@@ -42,7 +43,7 @@ class Object3D:
             nodes_to_traverse = node.children + nodes_to_traverse
 
         return descendants
-    
+
     def apply_translation(self, matrix, is_local=True):
         if is_local:
             self.translation_matrix = self.translation_matrix @ matrix
@@ -50,28 +51,30 @@ class Object3D:
             self.translation_matrix = matrix @ self.translation_matrix
 
     def apply_rotation(self, q):
-        self.rotation_matrix[:3, :3] = quaternion.as_rotation_matrix(q) @ self.rotation_matrix[:3, :3]
+        self.rotation_matrix[:3, :3] = quaternion.as_rotation_matrix(
+            q) @ self.rotation_matrix[:3, :3]
 
     def apply_scale(self, matrix, is_local=True):
         if is_local:
             self.scale_matrix = self.scale_matrix @ matrix
         else:
             self.scale_matrix = matrix @ self.scale_matrix
-    
+
     def translate(self, x, y, z, is_local=True):
         m = Mat44.make_translation(x, y, z)
         self.apply_translation(m, is_local)
 
     def rotate_around_axis(self, angle, axis):
-        q = np.quaternion(cos(angle/2), *np.multiply(axis, [sin(angle/2), sin(angle/2), sin(angle/2)]))
+        q = np.quaternion(cos(angle/2), *np.multiply(axis,
+                          [sin(angle/2), sin(angle/2), sin(angle/2)]))
         self.apply_rotation(q)
-    
+
     def rotate_x(self, angle):
         self.rotate_around_axis(angle, [1, 0, 0])
-    
+
     def rotate_y(self, angle):
         self.rotate_around_axis(angle, [0, 1, 0])
-    
+
     def rotate_z(self, angle):
         self.rotate_around_axis(angle, [0, 0, 1])
 
@@ -86,13 +89,14 @@ class Object3D:
     [0, 0, 1, Tz]
     [0, 0, 0,  1]
     """
+
     def get_position(self):
         return [
             self.translation_matrix.item((0, 3)),
             self.translation_matrix.item((1, 3)),
             self.translation_matrix.item((2, 3)),
         ]
-    
+
     def get_world_position(self):
         world_transform = self.get_world_matrix()
         return [
@@ -100,7 +104,7 @@ class Object3D:
             world_transform.item((1, 3)),
             world_transform.item((2, 3)),
         ]
-    
+
     def set_position(self, position):
         self.translation_matrix.itemset((0, 3), position[0])
         self.translation_matrix.itemset((1, 3), position[1])
@@ -108,3 +112,18 @@ class Object3D:
 
     def set_rotation(self, rotation):
         self.rotation_matrix[:3, :3] = rotation
+
+    def look_at(self, target):
+        dx, dy, dz = np.subtract(target, self.get_world_position())
+        pitch = -atan2(dy, np.sqrt(dx**2+dz**2))
+        yaw = atan2(dz, dx) - pi/2
+        yaw = -yaw
+
+        # x-axis quaternion
+        q1 = np.quaternion(cos(pitch/2), sin(pitch/2), 0, 0)
+
+        # y-axis quaternion
+        q2 = np.quaternion(cos(yaw/2), 0, sin(yaw/2), 0)
+
+        self.set_rotation(quaternion.as_rotation_matrix(q2 * q1))
+        
