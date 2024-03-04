@@ -41,4 +41,6 @@ class Attribute:
             raise Exception(f"Attribute {variable_name} has unknown type: {self.data_type}")
         
         glEnableVertexAttribArray(variable_ref)
-        
+
+        # reset
+        glBindBuffer(GL_ARRAY_BUFFER, 0)

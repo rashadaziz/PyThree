@@ -25,7 +25,6 @@ class Renderer:
                 continue
 
             glUseProgram(mesh.material.program_ref)
-
             glBindVertexArray(mesh.vao_ref)
 
             mesh.material.uniforms["modelMatrix"].data = mesh.get_world_matrix()
@@ -40,6 +39,5 @@ class Renderer:
             glDrawArrays(mesh.material.settings['drawStyle'], 0, mesh.geometry.vertex_count)
 
             # reset
-            glBindBuffer(GL_ARRAY_BUFFER, 0)
-            glBindVertexArray(0)
             glUseProgram(0)
+            glBindVertexArray(0)
