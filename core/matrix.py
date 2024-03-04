@@ -74,22 +74,10 @@ class Mat44:
         ]).astype(float)
     
     @staticmethod
-    def make_look_at(position, target, world_up=[0, 1, 0]):
-        forward = np.subtract(target, position)
-        right = np.cross(forward, world_up)
-        
-        # if forward and world_up are parallel
-        if np.linalg.norm(right) < 1e-6:
-            offset = np.array([0, 0, -1e-3])
-            right = np.cross(forward, world_up + offset)
-
-        up = np.cross(right, forward)
-        forward = np.divide(forward, np.linalg.norm(forward))
-        right = np.divide(right, np.linalg.norm(right))
-        up = np.divide(up, np.linalg.norm(up))
-        return np.array(
-            [[right[0], up[0], -forward[0], position[0]],
-             [right[1], up[1], -forward[1], position[1]],
-             [right[2], up[2], -forward[2], position[2]],
-             [0, 0, 0, 1]]
-        ).astype(float)
+    def make_orthographic(left=-1, right=1, bottom=-1, top=1, near=-1, far=1):
+        return np.array([
+            [2/(right-left), 0, 0, -(right+left)/(right-left)],
+            [0, 2/(top-bottom), 0, -(top+bottom)/(top-bottom)],
+            [0, 0, -2/(far-near), -(far+near)/(far-near)],
+            [0, 0, 0, 1]
+        ]).astype(float)
