@@ -115,8 +115,8 @@ class Object3D:
 
     def look_at(self, target):
         dx, dy, dz = np.subtract(target, self.get_world_position())
-        pitch = -atan2(dy, np.sqrt(dx**2+dz**2))
-        yaw = atan2(dz, dx) - pi/2
+        pitch = atan2(dy, np.sqrt(dx**2+dz**2))
+        yaw = atan2(dz, dx) + pi/2
         yaw = -yaw
 
         # x-axis quaternion

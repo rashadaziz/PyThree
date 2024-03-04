@@ -82,9 +82,9 @@ class FirstPersonCamera(Camera):
 
     def look_at(self, target):
         to_deg = 180 / pi
-        dx, dy, dz = np.subtract(self.get_world_position(), target)
-        pitch = -atan2(dy, np.sqrt(dx**2+dz**2)) * to_deg
-        yaw = atan2(dz, dx)*to_deg - 90
+        dx, dy, dz = np.subtract(target, self.get_world_position())
+        pitch = atan2(dy, np.sqrt(dx**2+dz**2)) * to_deg
+        yaw = atan2(dz, dx)*to_deg + 90
 
         self.pitch = pitch
         self.yaw = yaw
