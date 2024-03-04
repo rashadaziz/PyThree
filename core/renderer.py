@@ -11,8 +11,11 @@ class Renderer:
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glClearColor(*clear_color, 1)
 
-    def render(self, scene: Scene, camera: Camera):
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    def render(self, scene: Scene, camera: Camera, clear_color_buffer=True, clear_depth_buffer=True):
+        if clear_color_buffer:
+            glClear(GL_COLOR_BUFFER_BIT)
+        if clear_depth_buffer:
+            glClear(GL_DEPTH_BUFFER_BIT)
 
         camera.update()
 
