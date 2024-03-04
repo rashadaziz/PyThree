@@ -11,11 +11,11 @@ class Input:
 
         self.is_mouse_moving = False
 
-    def get(self):
+    def process_events(self, events):
         self.is_mouse_moving = False
         self.key_down_set.clear()
         self.key_up_set.clear()
-        for event in pygame.event.get():
+        for event in events:
             if event.type == QUIT:
                 self.is_program_exited = True
             if event.type == KEYDOWN:

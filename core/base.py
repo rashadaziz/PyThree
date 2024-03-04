@@ -3,7 +3,6 @@ import sys
 from abc import ABCMeta, abstractmethod
 from core.input import Input
 
-
 class BaseApplication(metaclass=ABCMeta):
     def __init__(self, screen_size=(512, 512), fps=60) -> None:
         pygame.init()
@@ -43,15 +42,18 @@ class BaseApplication(metaclass=ABCMeta):
     @abstractmethod
     def update(self):
         pass
+
+    def process_events(self, events: "list[pygame.Event]"):
+        self.input.process_events(events)
+        if self.input.is_program_exited:
+            self.is_running = False
     
     def run(self):
         self.initialize()
-        
         while self.is_running:
             # process user input
-            self.input.get()
-            if self.input.is_program_exited:
-                self.is_running = False
+            events = pygame.event.get()
+            self.process_events(events)
 
             self.delta_time = self.clock.get_time() / 1000
             self.time += self.delta_time

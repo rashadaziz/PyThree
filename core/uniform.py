@@ -38,4 +38,8 @@ class Uniform:
             glActiveTexture(GL_TEXTURE0 + texture_unit_ref)
             glBindTexture(GL_TEXTURE_2D, texture_obj_ref)
             glUniform1i(self.variable_ref, texture_unit_ref)
-        
+
+            # reset
+            glActiveTexture(GL_TEXTURE0)
+            glBindTexture(GL_TEXTURE_2D, 0)
+                    

@@ -38,3 +38,8 @@ class Renderer:
             mesh.material.update_render_settings()
             
             glDrawArrays(mesh.material.settings['drawStyle'], 0, mesh.geometry.vertex_count)
+
+            # reset
+            glBindBuffer(GL_ARRAY_BUFFER, 0)
+            glBindVertexArray(0)
+            glUseProgram(0)
