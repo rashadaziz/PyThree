@@ -114,6 +114,7 @@ class FirstPersonCamera(Camera):
 
     def update_rotation_matrix(self):
         to_rad = pi / 180
+        self.yaw %= 360
         yaw = -self.yaw * to_rad
         pitch = self.pitch * to_rad
 
