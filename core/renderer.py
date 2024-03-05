@@ -2,6 +2,7 @@ from OpenGL.GL import *
 from core.mesh import Mesh
 from core.scene import Scene
 from core.camera import Camera
+import pygame
 
 class Renderer:
     def __init__(self, clear_color=[0, 0, 0]) -> None:
@@ -11,7 +12,16 @@ class Renderer:
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
         glClearColor(*clear_color, 1)
 
-    def render(self, scene: Scene, camera: Camera, clear_color_buffer=True, clear_depth_buffer=True):
+        self.screen_size = pygame.display.get_surface().get_size()
+
+    def render(self, scene: Scene, camera: Camera, clear_color_buffer=True, clear_depth_buffer=True, render_target=None):
+        if render_target is None:
+            glBindFramebuffer(GL_FRAMEBUFFER, 0)
+            glViewport(0, 0, *self.screen_size)
+        else:
+            glBindFramebuffer(GL_FRAMEBUFFER, render_target.frame_buffer_ref)
+            glViewport(0, 0, render_target.width, render_target.height)
+
         if clear_color_buffer:
             glClear(GL_COLOR_BUFFER_BIT)
         if clear_depth_buffer:
@@ -44,3 +54,5 @@ class Renderer:
             # reset
             glUseProgram(0)
             glBindVertexArray(0)
+        
+        glBindFramebuffer(GL_FRAMEBUFFER, 0)

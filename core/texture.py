@@ -1,4 +1,5 @@
 import pygame
+from core.utils import TEXTURE_PATH
 from OpenGL.GL import *
 
 class Texture:
@@ -15,7 +16,7 @@ class Texture:
         self.set_properties(properties)
 
         if file_name:
-            self.load_image(file_name)
+            self.load_image(TEXTURE_PATH + file_name)
             self.upload_data()
 
     def load_image(self, file_name):
