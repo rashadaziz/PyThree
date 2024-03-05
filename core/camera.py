@@ -27,7 +27,8 @@ class Camera(Object3D):
         pass
 
     def update(self):
-        pass
+        self.update_rotation_matrix()
+        self.update_view_matrix()
 
     def process_input(self, input: Input):
         pass
