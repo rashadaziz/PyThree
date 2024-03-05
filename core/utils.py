@@ -3,6 +3,7 @@ from OpenGL.GL import *
 ASSETS_PATH = 'assets/'
 SHADER_PATH = ASSETS_PATH + 'shaders/'
 OBJECT_PATH = ASSETS_PATH + 'objects/'
+TEXTURE_PATH = ASSETS_PATH + 'textures/'
 
 class OpenGLUtils:
     @staticmethod
