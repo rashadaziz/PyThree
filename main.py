@@ -1,22 +1,20 @@
 from core.base import BaseApplication
 from core.renderer import Renderer
 from core.scene import Scene
+from core.utils import OpenGLUtils
+from core.light import DirectionalLight
 from core.mesh import Mesh
-from core.utils import OpenGLUtils, ASSETS_PATH
-from core.texture import Texture
-from geometry import SphereGeometry, BoxGeometry
-from material.texture import TextureMaterial
-from material.surface import SurfaceMaterial
-from extras.axes_helper import AxesHelper
-from extras.grid_helper import GridHelper
+from geometry import RectangleGeometry
+from material.phong import PhongMaterial
+from extras.impossible_cube import ImpossibleCube
 from extras.view_bobbing_camera import ViewBobbingCamera
+from imgui.integrations.pygame import PygameRenderer
+from OpenGL.GL import *
 from pygame.locals import *
-from math import pi, sin, cos
 import pygame
-import quaternion
 import numpy as np
 import imgui
-from imgui.integrations.pygame import PygameRenderer
+
 
 class Test(BaseApplication):
     def initialize(self):
@@ -29,42 +27,31 @@ class Test(BaseApplication):
         io.display_size = self.screen.get_size()
 
         self.show_gui = False
-        sw, sh = self.screen.get_size()
-        self.gui_size = (sw//4, sh//2)
         self.last_mouse_pos = None
 
         self.renderer = Renderer()
         self.scene = Scene()
         self.camera = ViewBobbingCamera(
-            self.clock, effect_multiplier=1, aspect_ratio=self.aspect_ratio, initial_position=[-2, 1, 4])
+            self.clock, near=0.01, effect_multiplier=1.1, aspect_ratio=self.aspect_ratio, initial_position=[0, 1, 6])
+        
 
-        planet_texture = Texture(ASSETS_PATH + "textures/earth.jpg")
-        self.planet = Mesh(geometry=SphereGeometry(),
-                           material=TextureMaterial(planet_texture))
-        self.planet.translate(8, 2, 0)
-        self.scene.add(self.planet)
+        self.cube = ImpossibleCube(object_material=PhongMaterial)
+        self.cube.translate(0, 2, 0)
+        self.scene.add(self.cube)
 
-        sky_box_texture = Texture(ASSETS_PATH + "textures/skybox.png")
-        self.sky_box = Mesh(geometry=SphereGeometry(
-            radius=100), material=TextureMaterial(sky_box_texture))
-        self.scene.add(self.sky_box)
+        # self.scene.add(Mesh(SphereGeometry(radius=250), TextureMaterial(texture=Texture("skybox.png"))))
+        self.scene.add(Mesh(RectangleGeometry(width=8, height=10), PhongMaterial(
+            properties={"baseColor": [1, 0, 0]})).rotate_x(-np.pi/2).translate(-4, 0, 0))
+        self.scene.add(Mesh(RectangleGeometry(width=8, height=10), PhongMaterial(
+            properties={"baseColor": [0, 0, 1]})).rotate_x(-np.pi/2).translate(4, 0, 0))
 
-        self.box = Mesh(geometry=BoxGeometry(),
-                        material=SurfaceMaterial())
-        self.scene.add(self.box)
-        self.box.translate(0, 1, 0)
-
-        self.planet.add(AxesHelper(axis_length=2.5))
-        self.box.add(AxesHelper(axis_length=2.5))
-
-        grid = GridHelper()
-        grid.rotate_x(-pi/2)
-        self.scene.add(grid)
+        self.scene.add(DirectionalLight(direction=[1, 1, -1]))
+        self.scene.add(DirectionalLight(direction=[-1, 1, 1]))
+        self.scene.add(DirectionalLight(direction=[1, -1, 1]))
+        self.scene.add(DirectionalLight(direction=[-1, -1, -1]))
 
         pygame.mouse.set_visible(False)
         pygame.event.set_grab(True)
-
-        self.color = [0, 0, 0]
 
     def process_events(self, events):
         super().process_events(events)
@@ -73,7 +60,6 @@ class Test(BaseApplication):
         if self.input.is_key_down(K_F1):
             self.show_gui = not self.show_gui
             pygame.mouse.set_visible(self.show_gui)
-            pygame.event.set_grab(not self.show_gui)
             if self.show_gui:
                 # get mouse pos during camera mode
                 before_pos = pygame.mouse.get_pos()
@@ -90,24 +76,27 @@ class Test(BaseApplication):
             self.gui_renderer.process_event(event)
         self.gui_renderer.process_inputs()
 
-    
     def render_gui(self):
         imgui.new_frame()
 
-        imgui.show_test_window()
-
         imgui.set_next_window_size(0, 0)
         imgui.set_next_window_position(0, 0)
-        imgui.begin("Debug Window", flags=imgui.WINDOW_NO_COLLAPSE | imgui.WINDOW_NO_RESIZE)
+        imgui.begin("Debug Window", flags=imgui.WINDOW_NO_COLLAPSE |
+                    imgui.WINDOW_NO_RESIZE)
 
         imgui.text("Camera Controls")
-        _ , self.camera.pitch = imgui.slider_float("pitch", self.camera.pitch, -89, 89)
-        _ , self.camera.yaw = imgui.drag_float("yaw", self.camera.yaw, 1, -360, 360)
-        imgui.text("")
+        _, self.camera.pitch = imgui.slider_float(
+            "pitch", self.camera.pitch, -85, 85)
+        _, self.camera.yaw = imgui.drag_float(
+            "yaw", self.camera.yaw, 1, -360, 360)
+        _, self.camera.translation_matrix[0, 3] = imgui.drag_float(
+            "x", self.camera.translation_matrix[0, 3], 0.5, -np.inf, +np.inf)
+        _, self.camera.translation_matrix[1, 3] = imgui.drag_float(
+            "y", self.camera.translation_matrix[1, 3], 0.5, -np.inf, +np.inf)
+        _, self.camera.translation_matrix[2, 3] = imgui.drag_float(
+            "z", self.camera.translation_matrix[2, 3], 0.5, -np.inf, +np.inf)
 
-        imgui.text("Box Controls")
-        _ , color = imgui.color_edit3("color", *self.box.material.uniforms["baseColor"].data)
-        self.box.material.uniforms["baseColor"].data = color
+        imgui.text(f"Camera Facing: {self.camera.get_direction()}")
 
         imgui.end()
 
@@ -115,18 +104,14 @@ class Test(BaseApplication):
         self.gui_renderer.render(imgui.get_draw_data())
 
     def update(self):
-        self.planet.rotate_y(pi/100)
-        q_orbit = np.quaternion(cos(-pi/600), 0, sin(-pi/600), 0)
-        position = self.planet.get_world_position()
-        new_position = position @ quaternion.as_rotation_matrix(q_orbit)
+        self.cube.rotate_y(np.pi/300 * np.sin(self.time))
+        self.cube.rotate_x(np.pi/400 * np.cos(self.time))
+        self.cube.rotate_z(np.pi/350 * np.sin(self.time))
 
-        self.box.look_at(self.planet.get_world_position())
-
-        self.planet.set_position(new_position)
         self.renderer.render(self.scene, self.camera)
-
         if self.show_gui:
             self.render_gui()
+
 
 def main():
     Test(screen_size=[1600, 900], fps=60).run()
