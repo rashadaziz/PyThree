@@ -14,6 +14,12 @@ class Material:
 
         self.settings = {}
         self.settings["drawStyle"] = GL_TRIANGLES
+        self.settings["stencilWrite"] = False
+        self.settings["stencilRef"] = 0
+        self.settings["stencilFunc"] = GL_ALWAYS
+        self.settings["stencilZPass"] = GL_KEEP
+        self.settings["depthWrite"] = True
+        self.settings["colorWrite"] = True
 
     def add_uniform(self, data_type, var_name, data):
         self.uniforms[var_name] = Uniform(data_type, data)
@@ -23,7 +29,21 @@ class Material:
             uniform_obj.locate_variable(self.program_ref, var_name)
 
     def update_render_settings(self):
-        pass
+        if self.settings["stencilWrite"]:
+            glStencilMask(0xFF)
+            glStencilOp(GL_KEEP, GL_KEEP, self.settings["stencilZPass"])
+            glStencilFunc(self.settings["stencilFunc"], self.settings["stencilRef"], 0xFF)
+        
+        if self.settings["depthWrite"]:
+            glDepthMask(GL_TRUE)
+        else:
+            glDepthMask(GL_FALSE)
+
+        if self.settings["colorWrite"]:
+            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE)
+        else:
+            glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE)
+
 
     def set_properties(self, properties):
         for var_name, data in properties.items():

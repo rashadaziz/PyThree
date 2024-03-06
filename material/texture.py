@@ -31,3 +31,5 @@ class TextureMaterial(Material):
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
         
         glLineWidth(self.settings["lineWidth"])
+
+        return super().update_render_settings()

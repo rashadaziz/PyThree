@@ -18,3 +18,5 @@ class PointMaterial(BasicMaterial):
             glEnable(GL_POINT_SMOOTH)
         else:
             glDisable(GL_POINT_SMOOTH)
+
+        return super().update_render_settings()

@@ -24,3 +24,5 @@ class LineMaterial(BasicMaterial):
             self.settings["drawStyle"] = GL_LINES
         else:
             raise Exception(f"Attempting to draw LineMaterial with unknown line style '{line_type}'")
+        
+        return super().update_render_settings()
