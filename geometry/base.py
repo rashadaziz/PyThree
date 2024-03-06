@@ -1,5 +1,6 @@
 from core.attribute import Attribute
 from typing import Dict, TypeVar
+import numpy as np
 
 TGeometry = TypeVar('TGeometry', bound='Geometry')
 
@@ -28,6 +29,28 @@ class Geometry:
             new_pos_data.append(new_pos)
         
         self.attributes[var_name].data = new_pos_data
+
+        rot_mat = np.array(matrix[:3, :3])
+        old_vertex_normals = self.attributes["vertexNormal"].data
+        new_vertex_normals = []
+
+        for old_normal in old_vertex_normals:
+            new_normal = old_normal.copy()
+            new_normal = rot_mat @ new_normal
+            new_vertex_normals.append(new_normal)
+        
+        self.attributes["vertexNormal"].data = new_vertex_normals
+        
+        old_face_normals = self.attributes["faceNormal"].data
+        new_face_normals = []
+
+        for old_normal in old_face_normals:
+            new_normal = old_normal.copy()
+            new_normal = rot_mat @ new_normal
+            new_face_normals.append(new_normal)
+        
+        self.attributes["faceNormal"].data = new_face_normals
+
         self.attributes[var_name].upload_data()
 
     def merge(self, other: TGeometry):

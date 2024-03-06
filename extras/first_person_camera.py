@@ -1,5 +1,4 @@
 from core.camera import Camera
-from core.matrix import Mat44
 from math import sin, cos, pi, atan2
 from pygame.locals import *
 import pygame
@@ -15,7 +14,7 @@ class FirstPersonCamera(Camera):
         self.yaw = 0
         
         self.locked = False
-        self.no_clip = False
+        self.no_clip = initial_position[1] > 1
         self.spacebar_timer = 0
         self.space_was_pressed = False
         self.is_moving = False

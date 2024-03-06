@@ -33,6 +33,27 @@ class Object3D:
 
         # recursively query the world matrix
         return self.parent.get_world_matrix() @ model_matrix
+    
+    def get_model_matrix(self):
+        return self.translation_matrix @ self.rotation_matrix @ self.scale_matrix
+    
+    def get_world_translation(self):
+        if self.parent is None:
+            return self.translation_matrix
+        
+        return self.parent.get_world_translation() @ self.translation_matrix
+    
+    def get_world_rotation(self):
+        if self.parent is None:
+            return self.rotation_matrix
+        
+        return self.parent.get_world_rotation() @ self.rotation_matrix
+
+    def get_world_scale(self):
+        if self.parent is None:
+            return self.scale_matrix
+        
+        return self.parent.get_world_scale() @ self.scale_matrix
 
     def get_descendants(self) -> List[TObject3D]:
         descendants: List[TObject3D] = []
@@ -50,9 +71,13 @@ class Object3D:
         else:
             self.translation_matrix = matrix @ self.translation_matrix
 
+        return self
+
     def apply_rotation(self, q):
         self.rotation_matrix[:3, :3] = quaternion.as_rotation_matrix(
             q) @ self.rotation_matrix[:3, :3]
+
+        return self
 
     def apply_scale(self, matrix, is_local=True):
         if is_local:
@@ -60,27 +85,29 @@ class Object3D:
         else:
             self.scale_matrix = matrix @ self.scale_matrix
 
+        return self
+
     def translate(self, x, y, z, is_local=True):
         m = Mat44.make_translation(x, y, z)
-        self.apply_translation(m, is_local)
+        return self.apply_translation(m, is_local)
 
     def rotate_around_axis(self, angle, axis):
         q = np.quaternion(cos(angle/2), *np.multiply(axis,
                           [sin(angle/2), sin(angle/2), sin(angle/2)]))
-        self.apply_rotation(q)
+        return self.apply_rotation(q)
 
     def rotate_x(self, angle):
-        self.rotate_around_axis(angle, [1, 0, 0])
+        return self.rotate_around_axis(angle, [1, 0, 0])
 
     def rotate_y(self, angle):
-        self.rotate_around_axis(angle, [0, 1, 0])
+        return self.rotate_around_axis(angle, [0, 1, 0])
 
     def rotate_z(self, angle):
-        self.rotate_around_axis(angle, [0, 0, 1])
+        return self.rotate_around_axis(angle, [0, 0, 1])
 
     def scale(self, scale, is_local=True):
         m = Mat44.make_scale(scale)
-        self.apply_scale(m, is_local)
+        return self.apply_scale(m, is_local)
 
     """
     Get the last column of this matrix
@@ -91,27 +118,47 @@ class Object3D:
     """
 
     def get_position(self):
-        return [
-            self.translation_matrix.item((0, 3)),
-            self.translation_matrix.item((1, 3)),
-            self.translation_matrix.item((2, 3)),
-        ]
+        return self.translation_matrix[:3, 3]
 
     def get_world_position(self):
         world_transform = self.get_world_matrix()
-        return [
-            world_transform.item((0, 3)),
-            world_transform.item((1, 3)),
-            world_transform.item((2, 3)),
-        ]
+        return world_transform[:3, 3]
+    
+    def get_world_position_vec4(self):
+        world_transform = self.get_world_matrix()
+        return world_transform[:, 3]
+
+    def get_rotation_matrix(self):
+        return self.rotation_matrix[:3, :3].copy()
+    
+    def get_direction(self):
+        forward = np.array([0, 0, -1])
+        return self.get_world_rotation()[:3, :3] @ forward
 
     def set_position(self, position):
         self.translation_matrix.itemset((0, 3), position[0])
         self.translation_matrix.itemset((1, 3), position[1])
         self.translation_matrix.itemset((2, 3), position[2])
 
+        return self
+
     def set_rotation(self, rotation):
         self.rotation_matrix[:3, :3] = rotation
+        
+        return self
+
+    def set_scale(self, scale):
+        self.scale_matrix[0, 0] = scale
+        self.scale_matrix[1, 1] = scale
+        self.scale_matrix[2, 2] = scale
+
+        return self
+
+    def set_direction(self, direction):
+        target = np.add(self.get_position(), direction)
+        self.look_at(target)
+
+        return self
 
     def look_at(self, target):
         dx, dy, dz = np.subtract(target, self.get_world_position())
@@ -126,4 +173,6 @@ class Object3D:
         q2 = np.quaternion(cos(yaw/2), 0, sin(yaw/2), 0)
 
         self.set_rotation(quaternion.as_rotation_matrix(q2 * q1))
+
+        return self
         

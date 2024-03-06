@@ -8,6 +8,15 @@ class Uniform:
         self.variable_ref = None
     
     def locate_variable(self, program_ref, variable_name):
+        if self.data_type == "Light":
+            self.variable_ref = {}
+            self.variable_ref["type"] = glGetUniformLocation(program_ref, variable_name + ".type")
+            self.variable_ref["color"] = glGetUniformLocation(program_ref, variable_name + ".color")
+            self.variable_ref["direction"] = glGetUniformLocation(program_ref, variable_name + ".direction")
+            self.variable_ref["position"] = glGetUniformLocation(program_ref, variable_name + ".position")
+            self.variable_ref["attenuation"] = glGetUniformLocation(program_ref, variable_name + ".attenuation")
+            return
+
         self.variable_ref = glGetUniformLocation(program_ref, variable_name)
     
     def upload_data(self):
@@ -42,4 +51,11 @@ class Uniform:
             # reset
             glActiveTexture(GL_TEXTURE0)
             glBindTexture(GL_TEXTURE_2D, 0)
+        elif self.data_type == "Light":
+            glUniform1i(self.variable_ref["type"], self.data.type)
+            glUniform3f(self.variable_ref["color"], *self.data.color)
+            glUniform3f(self.variable_ref["direction"], *self.data.get_direction())
+            glUniform3f(self.variable_ref["position"], *self.data.get_world_position())
+            glUniform3f(self.variable_ref["attenuation"], *self.data.attenuation)
+
                     
