@@ -3,6 +3,7 @@ import sys
 from abc import ABCMeta, abstractmethod
 from core.input import Input
 
+
 class BaseApplication(metaclass=ABCMeta):
     def __init__(self, screen_size=(512, 512), fps=60) -> None:
         pygame.init()
@@ -21,6 +22,8 @@ class BaseApplication(metaclass=ABCMeta):
             pygame.GL_CONTEXT_PROFILE_MASK,
             pygame.GL_CONTEXT_PROFILE_CORE
         )
+
+        pygame.display.gl_set_attribute(pygame.GL_STENCIL_SIZE, 8)
 
         # init pygame window
         self.screen = pygame.display.set_mode(screen_size, display_flags)
@@ -47,7 +50,7 @@ class BaseApplication(metaclass=ABCMeta):
         self.input.process_events(events)
         if self.input.is_program_exited:
             self.is_running = False
-    
+
     def run(self):
         self.initialize()
         while self.is_running:
