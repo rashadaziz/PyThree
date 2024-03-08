@@ -3,6 +3,7 @@ from core.mesh import Mesh
 from core.scene import Scene
 from core.camera import Camera
 from core.light import Light
+from typing import List
 import pygame
 
 
@@ -17,6 +18,12 @@ class Renderer:
 
         self.screen_size = pygame.display.get_surface().get_size()
 
+    def render_impl(self, camera: Camera, meshes: List[Mesh], lights: List[Light]):
+        for mesh in meshes:
+            if not mesh.visible:
+                continue
+            mesh.render(camera=camera, lights=lights)
+
     def render(self, scene: Scene, camera: Camera, clear_color_buffer=True, clear_depth_buffer=True, render_target=None):
         if render_target is None:
             glBindFramebuffer(GL_FRAMEBUFFER, 0)
@@ -30,6 +37,7 @@ class Renderer:
         if clear_depth_buffer:
             glClear(GL_DEPTH_BUFFER_BIT)
 
+        glStencilMask(0xFF)
         glClear(GL_STENCIL_BUFFER_BIT)
 
         camera.update()
@@ -43,39 +51,6 @@ class Renderer:
         while len(light_list) < 4:
             light_list.append(Light())
 
-        for mesh in mesh_list:
-            if not mesh.visible:
-                continue
-            
-            glUseProgram(mesh.material.program_ref)
-            glBindVertexArray(mesh.vao_ref)
-
-            mesh.material.uniforms["modelMatrix"].data = mesh.get_world_matrix()
-            mesh.material.uniforms["viewMatrix"].data = camera.view_matrix
-            mesh.material.uniforms["projectionMatrix"].data = camera.projection_matrix
-
-            if "light0" in mesh.material.uniforms.keys():
-                for i in range(4):
-                    var_name = "light" + str(i)
-                    light_obj = light_list[i]
-                    mesh.material.uniforms[var_name].data = light_obj
-            
-            if "viewPosition" in mesh.material.uniforms.keys():
-                mesh.material.uniforms["viewPosition"].data = camera.get_world_position()
-
-            for uniform_obj in mesh.material.uniforms.values():
-                uniform_obj.upload_data()
-
-            mesh.material.update_render_settings()
-
-            glDrawArrays(
-                mesh.material.settings['drawStyle'], 0, mesh.geometry.vertex_count)
-
-            # reset
-            glUseProgram(0)
-            glBindVertexArray(0)
-            glStencilMask(0xFF)
-            glStencilFunc(GL_ALWAYS, 0, 0xFF)
-            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP)
-
+        self.render_impl(camera, mesh_list, light_list)
+        
         glBindFramebuffer(GL_FRAMEBUFFER, 0)
