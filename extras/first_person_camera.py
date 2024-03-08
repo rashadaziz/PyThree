@@ -10,9 +10,6 @@ class FirstPersonCamera(Camera):
         super().__init__(fov, aspect_ratio, near, far)
         self.clock = clock
 
-        self.pitch = 0
-        self.yaw = 0
-        
         self.locked = False
         self.no_clip = initial_position[1] > 1
         self.spacebar_timer = 0
@@ -24,7 +21,7 @@ class FirstPersonCamera(Camera):
 
         self.camera_front = np.array([0, 0, 0]).astype(float)
         self.camera_up = [0, 1, 0]
-        self.camera_speed = 2.5
+        self.camera_speed = 5
 
         self.set_position(initial_position)
         self.update_rotation_matrix()
@@ -62,14 +59,7 @@ class FirstPersonCamera(Camera):
                 self.space_was_pressed = True
 
         if input.is_mouse_moving:
-            sensitivity = 0.05
-            dx, dy = pygame.mouse.get_rel()
-            self.yaw += dx * sensitivity
-            self.pitch -= dy * sensitivity
-            if self.pitch > 85:
-                self.pitch = 85
-            elif self.pitch < -85:
-                self.pitch = -85
+            self.handle_mouse_look(*pygame.mouse.get_rel())
         
         if self.no_clip:
             delta_time = self.clock.get_time() / 1000
@@ -79,14 +69,15 @@ class FirstPersonCamera(Camera):
             if input.is_key_pressed(K_LCTRL):
                 self.translation_matrix.itemset((1, 3), y_pos-self.camera_speed*delta_time*1.2)
 
-    def look_at(self, target):
-        to_deg = 180 / pi
-        dx, dy, dz = np.subtract(target, self.get_world_position())
-        pitch = atan2(dy, np.sqrt(dx**2+dz**2)) * to_deg
-        yaw = atan2(dz, dx)*to_deg + 90
+    def handle_mouse_look(self, dx, dy):
+        sensitivity = 0.8e-3
+        yaw_angle = -dx*sensitivity
+        pitch_angle = -dy*sensitivity
 
-        self.pitch = pitch
-        self.yaw = yaw
+        q_yaw = np.quaternion(cos(yaw_angle/2), 0, sin(yaw_angle/2), 0)
+        q_pitch = np.quaternion(cos(pitch_angle/2), sin(pitch_angle/2), 0, 0)
+        self.rotation_matrix[:3, :3] = quaternion.as_rotation_matrix(q_yaw) @ self.rotation_matrix[:3, :3]
+        self.rotation_matrix[:3, :3] = self.rotation_matrix[:3, :3] @ quaternion.as_rotation_matrix(q_pitch)
 
     def move(self, dir):
         self.is_moving = True
@@ -112,21 +103,7 @@ class FirstPersonCamera(Camera):
             self.move_direction += vec
 
     def update_rotation_matrix(self):
-        to_rad = pi / 180
-        self.yaw %= 360
-        yaw = -self.yaw * to_rad
-        pitch = self.pitch * to_rad
-
-        # x-axis quaternion
-        q1 = np.quaternion(cos(pitch/2), sin(pitch/2), 0, 0)
-
-        # y-axis quaternion
-        q2 = np.quaternion(cos(yaw/2), 0, sin(yaw/2), 0)
-
-        rotation_matrix = quaternion.as_rotation_matrix(q2 * q1)
         self.camera_front = np.negative(self.rotation_matrix[:3, 2]).astype(float)
-
-        self.set_rotation(rotation_matrix)
 
     def update_view_matrix(self):
         if not self.no_clip and self.translation_matrix[1, 3] > 1:
